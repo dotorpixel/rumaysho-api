@@ -8,16 +8,20 @@ $app->get('/','getHome');
 $app->get('/article-total-after/:id','getArticleTotalAfter');
 $app->get('/article/:limit/:offset','getArticleLimitOffset');
 $app->get('/article/:id','getArticle');
+$app->get('/article-search-by/:fild/:value/','articleFindBy');
+$app->get('/article-search-by/:fild/:value/:offset/:limit','articleFindBy');
 $app->post('/article', 'addArticle');
 $app->run();
 
 // Home page
-function getHome(){
+function getHome()
+{
     echo '<p><center>hallo selamat datang di api untuk website <a href="http://rumaysho.com">http://rumaysho.com</a> api ini dikerjakan oleh kami tim dari <a href="dotorpixel.com">dotorpixel.com</a> api ini bersifat terbuka, bila anda ingin memanfaatkan juga silahkan hubungi ~~~~</center></p>';
 };
 
 // Post add article from crawler
-function addArticle(){
+function addArticle()
+{
     global $app;
     $req = $app->request(); // Getting parameter with names
     $articleTitle = $req->params('title');
@@ -47,7 +51,8 @@ function addArticle(){
 }
 
 // get total artickel after :id
-function getArticleTotalAfter($id) {
+function getArticleTotalAfter($id)
+{
     $sql = "SELECT count(*) as total FROM articles WHERE id>:id";
     try {
         $db = getConnection();
@@ -76,7 +81,7 @@ function getArticleLimitOffset($limit = 0,$offset = 0)
         $stmt->execute();
         $article = $stmt->fetchAll(PDO::FETCH_OBJ);
         $db = null;
-        echo '{"wine": ' . json_encode($article) . '}';
+        echo '{"article": ' . json_encode($article) . '}';
     } catch(PDOException $e) {
         echo '{"error":{"text":'. $e->getMessage() .'}}';
     }
@@ -94,6 +99,28 @@ function getArticle($id = 0)
         $article = $stmt->fetchObject();
         $db = null;
         echo json_encode($article);
+    } catch(PDOException $e) {
+        echo '{"error":{"text":'. $e->getMessage() .'}}';
+    }
+}
+
+// search article by :fild :value
+function articleFindBy($fild , $value , $offset = 0 , $limit = 10)
+{
+    $thisLimit = intval($limit);
+    $thisOffset = intval($offset);
+    $sql = "SELECT * FROM articles WHERE ".$fild." LIKE :value ORDER BY id LIMIT :offset , :limit";
+    try {
+        $db = getConnection();
+        $stmt = $db->prepare($sql);
+        $value = "%".$value."%";
+        $stmt->bindParam("value", $value);
+        $stmt->bindParam("limit", $thisLimit, PDO::PARAM_INT);
+        $stmt->bindParam("offset", $thisOffset, PDO::PARAM_INT);
+        $stmt->execute();
+        $article = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $db = null;
+        echo '{"article": ' . json_encode($article) . '}';
     } catch(PDOException $e) {
         echo '{"error":{"text":'. $e->getMessage() .'}}';
     }
