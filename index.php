@@ -7,6 +7,7 @@ $app = new Slim();
 $app->get('/','getHome');
 $app->get('/article-total-after/:id','getArticleTotalAfter');
 $app->get('/article/:limit/:offset','getArticleLimitOffset');
+$app->get('/article/:id','getArticle');
 $app->post('/article', 'addArticle');
 $app->run();
 
@@ -64,7 +65,27 @@ function getArticleTotalAfter($id) {
 // get article :limit :offset
 function getArticleLimitOffset($limit = 0,$offset = 0)
 {
-    $sql = "select * FROM articles ORDER BY id LIMIT ".$offset.",".$limit;
+    $thisLimit = intval($limit);
+    $thisOffset = intval($offset);
+    $sql = "select * FROM articles ORDER BY id LIMIT :offset , :limit";
+    try {
+        $db = getConnection();
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam("limit", $thisLimit, PDO::PARAM_INT);
+        $stmt->bindParam("offset", $thisOffset, PDO::PARAM_INT);
+        $stmt->execute();
+        $article = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $db = null;
+        echo '{"wine": ' . json_encode($article) . '}';
+    } catch(PDOException $e) {
+        echo '{"error":{"text":'. $e->getMessage() .'}}';
+    }
+}
+
+// get article detail with :id
+function getArticle($id = 0)
+{
+    $sql = "select * FROM articles ORDER BY WHERE id>:id";
     try {
         $db = getConnection();
         $stmt = $db->query($sql);
