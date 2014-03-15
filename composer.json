@@ -1,10 +1,5 @@
 {
     "require": {
-        "slim/slim": "1.6.*",
-        "vrana/notorm": "dev-master"
-    },
-
-    "autoload": {
-        "classmap": ["vendor/vrana/notorm/"]
+        "slim/slim": "1.6.*"
     }
 }
