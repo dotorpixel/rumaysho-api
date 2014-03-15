@@ -6,6 +6,7 @@ $app = new Slim();
 // routes
 $app->get('/','getHome');
 $app->get('/article-total-after/:id','getArticleTotalAfter');
+$app->get('/article/:limit/:offset','getArticleLimitOffset');
 $app->post('/article', 'addArticle');
 $app->run();
 
@@ -44,6 +45,7 @@ function addArticle(){
     }
 }
 
+// get total artickel after :id
 function getArticleTotalAfter($id) {
     $sql = "SELECT count(*) as total FROM articles WHERE id>:id";
     try {
@@ -59,6 +61,20 @@ function getArticleTotalAfter($id) {
     }
 }
 
+// get article :limit :offset
+function getArticleLimitOffset($limit = 0,$offset = 0)
+{
+    $sql = "select * FROM articles ORDER BY id LIMIT ".$offset.",".$limit;
+    try {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $article = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $db = null;
+        echo '{"wine": ' . json_encode($article) . '}';
+    } catch(PDOException $e) {
+        echo '{"error":{"text":'. $e->getMessage() .'}}';
+    }
+}
 
  
 function getConnection() {
