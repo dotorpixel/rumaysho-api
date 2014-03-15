@@ -5,6 +5,7 @@ $app = new Slim();
 
 // routes
 $app->get('/','getHome');
+$app->get('/article-total-after/:id','getArticleTotalAfter');
 $app->post('/article', 'addArticle');
 $app->run();
 
@@ -42,6 +43,23 @@ function addArticle(){
         echo '{"error":{"text":'. $e->getMessage() .'}}';
     }
 }
+
+function getArticleTotalAfter($id) {
+    $sql = "SELECT count(*) as total FROM articles WHERE id>:id";
+    try {
+        $db = getConnection();
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam("id", $id);
+        $stmt->execute();
+        $article = $stmt->fetchObject();
+        $db = null;
+        echo json_encode($article);
+    } catch(PDOException $e) {
+        echo '{"error":{"text":'. $e->getMessage() .'}}';
+    }
+}
+
+
  
 function getConnection() {
     $dbhost="127.0.0.1";
