@@ -85,18 +85,19 @@ function getArticleLimitOffset($limit = 0,$offset = 0)
 // get article detail with :id
 function getArticle($id = 0)
 {
-    $sql = "select * FROM articles ORDER BY WHERE id>:id";
+    $sql = "SELECT * FROM articles WHERE id=:id";
     try {
         $db = getConnection();
-        $stmt = $db->query($sql);
-        $article = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam("id", $id);
+        $stmt->execute();
+        $article = $stmt->fetchObject();
         $db = null;
-        echo '{"wine": ' . json_encode($article) . '}';
+        echo json_encode($article);
     } catch(PDOException $e) {
         echo '{"error":{"text":'. $e->getMessage() .'}}';
     }
 }
-
  
 function getConnection() {
     $dbhost="127.0.0.1";
